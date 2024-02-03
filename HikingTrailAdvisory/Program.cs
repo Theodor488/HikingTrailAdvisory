@@ -12,70 +12,41 @@ namespace HikingTrailAdvisory
     {
         static async Task Main(string[] args)
         {
-            var url = "https://www.wta.org/go-outside/hikes";
-            var client = new HttpClient();
-            var html = await client.GetStringAsync(url);
+            string url = "https://www.wta.org/go-outside/hikes";
             string pattern = @"[^/]+$";
 
             new DriverManager().SetUpDriver(new ChromeConfig());
             IWebDriver driver = new ChromeDriver();
 
-            List<string> hikeLinks = ScrapeHikeLinks(driver);
-            //List<string> hikeNames = ScrapeHikeNames(html);
+            Dictionary<string, string> hikesDict = ScrapeHikeLinks(driver, url, pattern);
+        }
 
+        private static Dictionary<string, string> ScrapeHikeLinks(IWebDriver driver, string url, string pattern)
+        {
+            Dictionary<string, string> hikesDict = new Dictionary<string, string>();
+
+            // Navigate to the page containing the hikes
+            driver.Navigate().GoToUrl(url);
+
+            // Find all <a> elements
+            var hikes = driver.FindElements(By.TagName("a"));
+
+            // Filter to get only the links that lead to hike details
+            List<string> hikeLinks = hikes.Where(hike => hike.GetAttribute("href").Contains("/go-hiking/hikes/")).Select(link => link.GetAttribute("href")).Distinct().ToList();
+
+            // Create Name : link Dictionary of hike names and links
             foreach (string link in hikeLinks)
             {
                 Match match = Regex.Match(link, pattern);
 
                 if (match.Success)
                 {
-                    Console.WriteLine(match.Value);
+                    hikesDict.Add(match.Value, link);
+                    Console.WriteLine(match.Value + " " + link);
                 }
             }
-        }
 
-        private static List<string> ScrapeHikeLinks(IWebDriver driver)
-        {
-            // Navigate to the page containing the hikes
-            driver.Navigate().GoToUrl("https://www.wta.org/go-outside/hikes");
-
-            // Find all <a> elements
-            var links = driver.FindElements(By.TagName("a"));
-
-            // Filter to get only the links that lead to hike details
-            List<string> hikeLinks = links.Where(link => link.GetAttribute("href").Contains("/go-hiking/hikes/")).Select(link => link.GetAttribute("href")).Distinct().ToList();
-
-            return hikeLinks;
-
-            /*foreach (var link in hikeLinks)
-            {
-                Console.WriteLine(link);
-            }*/
-        }
-
-        static List<string> ScrapeHikeNames(string html)
-        {
-            var htmlDocument = new HtmlDocument();
-            htmlDocument.LoadHtml(html);
-            List<string> HikeNames = new List<string>();
-
-            var hikeNodes = htmlDocument.DocumentNode.SelectNodes("//div[@class='listing-image backpack-wrapper backpack-hikebuttons']");
-
-            if (hikeNodes != null)
-            {
-                foreach (var hikeNode in hikeNodes)
-                {
-                    var hikeName = hikeNode.GetAttributeValue("data-hikename", string.Empty);
-                    Console.WriteLine(hikeName);
-                    HikeNames.Add(hikeName);
-                }
-            }
-            else
-            {
-                Console.WriteLine("No hikes found");
-            }
-
-            return HikeNames;
+            return hikesDict;
         }
     }
 }
