@@ -3,6 +3,8 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using WebDriverManager.DriverConfigs.Impl;
 using WebDriverManager;
+using System;
+using System.Text.RegularExpressions;
 
 namespace HikingTrailAdvisory
 {
@@ -13,13 +15,23 @@ namespace HikingTrailAdvisory
             var url = "https://www.wta.org/go-outside/hikes";
             var client = new HttpClient();
             var html = await client.GetStringAsync(url);
+            string pattern = @"[^/]+$";
 
             new DriverManager().SetUpDriver(new ChromeConfig());
             IWebDriver driver = new ChromeDriver();
 
             List<string> hikeLinks = ScrapeHikeLinks(driver);
+            //List<string> hikeNames = ScrapeHikeNames(html);
 
-            List<string> hikeNames = ScrapeHikeNames(html);
+            foreach (string link in hikeLinks)
+            {
+                Match match = Regex.Match(link, pattern);
+
+                if (match.Success)
+                {
+                    Console.WriteLine(match.Value);
+                }
+            }
         }
 
         private static List<string> ScrapeHikeLinks(IWebDriver driver)
