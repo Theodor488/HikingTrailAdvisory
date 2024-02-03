@@ -45,6 +45,7 @@ namespace HikingTrailAdvisory
         {
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(html);
+            List<string> HikeNames = new List<string>();
 
             var hikeNodes = htmlDocument.DocumentNode.SelectNodes("//div[@class='listing-image backpack-wrapper backpack-hikebuttons']");
 
@@ -54,13 +55,15 @@ namespace HikingTrailAdvisory
                 {
                     var hikeName = hikeNode.GetAttributeValue("data-hikename", string.Empty);
                     Console.WriteLine(hikeName);
+                    HikeNames.Add(hikeName);
                 }
             }
             else
             {
                 Console.WriteLine("No hikes found");
             }
-        
+
+            return HikeNames;
         }
     }
 }
