@@ -1,10 +1,8 @@
-﻿using HtmlAgilityPack;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using WebDriverManager.DriverConfigs.Impl;
-using WebDriverManager;
-using System;
 using System.Text.RegularExpressions;
+using WebDriverManager;
+using WebDriverManager.DriverConfigs.Impl;
 
 namespace HikingTrailAdvisory
 {
@@ -12,22 +10,34 @@ namespace HikingTrailAdvisory
     {
         static async Task Main(string[] args)
         {
-            string url = "https://www.wta.org/go-outside/hikes";
+            string baseUrl = "https://www.wta.org/go-outside/hikes";
             string pattern = @"[^/]+$";
+            Dictionary<string, string> hikesDict = new Dictionary<string, string>();
 
+            // Set up Driver for web scraping
             new DriverManager().SetUpDriver(new ChromeConfig());
             IWebDriver driver = new ChromeDriver();
 
-            Dictionary<string, string> hikesDict = ScrapeHikeLinks(driver, url, pattern);
+            // Go to base url (WTA website with hiking trails)
+            driver.Navigate().GoToUrl(baseUrl);
+
+            try
+            {
+                while (true)
+                {
+                    // Click through all pages and populate hikesDict wirth all hike names / links
+                    IWebElement nextUrl = driver.FindElement(By.CssSelector("li.next a"));
+                    ScrapeHikeLinks(driver, nextUrl, pattern, hikesDict);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
 
-        private static Dictionary<string, string> ScrapeHikeLinks(IWebDriver driver, string url, string pattern)
+        private static Dictionary<string, string> ScrapeHikeLinks(IWebDriver driver, IWebElement url, string pattern, Dictionary<string, string> hikesDict)
         {
-            Dictionary<string, string> hikesDict = new Dictionary<string, string>();
-
-            // Navigate to the page containing the hikes
-            driver.Navigate().GoToUrl(url);
-
             // Find all <a> elements
             var hikes = driver.FindElements(By.TagName("a"));
 
@@ -45,6 +55,10 @@ namespace HikingTrailAdvisory
                     Console.WriteLine(match.Value + " " + link);
                 }
             }
+
+            // Navigate to the page containing the hikes
+            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", url);
+            url.Click();
 
             return hikesDict;
         }
