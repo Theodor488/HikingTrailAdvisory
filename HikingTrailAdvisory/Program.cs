@@ -25,7 +25,7 @@ namespace HikingTrailAdvisory
             {
                 while (true)
                 {
-                    // Click through all pages and populate hikesDict wirth all hike names / links
+                    // Click through all pages and populate hikesDict with all hike names / links
                     IWebElement nextUrl = driver.FindElement(By.CssSelector("li.next a"));
                     ScrapeHikeLinks(driver, nextUrl, pattern, hikesDict);
                 }
@@ -51,8 +51,12 @@ namespace HikingTrailAdvisory
 
                 if (match.Success)
                 {
+                    //((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", link);
+
                     hikesDict.Add(match.Value, link);
                     Console.WriteLine(match.Value + " " + link);
+
+                    ScrapeIndividualHikePage(driver, link, pattern, hikesDict);
                 }
             }
 
@@ -61,6 +65,20 @@ namespace HikingTrailAdvisory
             url.Click();
 
             return hikesDict;
+        }
+
+        private static void ScrapeIndividualHikePage(IWebDriver driver, string hikeUrl, string pattern, Dictionary<string, string> hikesDict) 
+        {
+            
+            //string headingText = headingElement.Text;
+
+            driver.Navigate().GoToUrl(hikeUrl);
+
+            string hikeName = driver.FindElement(By.ClassName("documentFirstHeading")).Text;
+            var length = driver.FindElement(By.XPath("//dt[contains(., 'Length')]/following-sibling::dd")).Text;
+            var elevationGain = driver.FindElement(By.XPath("//dt[contains(., 'Elevation Gain')]/following-sibling::dd")).Text;
+            var highestPoint = driver.FindElement(By.XPath("//dt[contains(., 'Highest Point')]/following-sibling::dd")).Text;
+
         }
     }
 }
