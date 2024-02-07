@@ -1,5 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.DevTools.V119.Network;
+using OpenQA.Selenium.Support.UI;
 using System.Text.RegularExpressions;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
@@ -12,7 +14,7 @@ namespace HikingTrailAdvisory
         {
             string baseUrl = "https://www.wta.org/go-outside/hikes";
             string pattern = @"[^/]+$";
-            Dictionary<string, string> hikesDict = new Dictionary<string, string>();
+            Dictionary<string, Hike> hikesDict = new Dictionary<string, Hike>();
 
             // Set up Driver for web scraping
             new DriverManager().SetUpDriver(new ChromeConfig());
@@ -32,7 +34,10 @@ namespace HikingTrailAdvisory
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                driver = new ChromeDriver(); // ERROR HERE. Fix Stale driver
+
+                IWebElement nextUrl = driver.FindElement(By.CssSelector("li.next a"));
+                HikeInfoScraper.ScrapeHikeLinks(driver, nextUrl, pattern, hikesDict);
             }
         }
 
