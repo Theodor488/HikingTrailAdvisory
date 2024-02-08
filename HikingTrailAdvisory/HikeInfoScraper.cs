@@ -7,6 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using OpenQA.Selenium.Support.UI;
+using System.Runtime.InteropServices;
+using OpenQA.Selenium.Chrome;
 
 namespace HikingTrailAdvisory
 {
@@ -17,18 +19,56 @@ namespace HikingTrailAdvisory
             // Find all <a> elements
             var hikes = driver.FindElements(By.TagName("a"));
 
-            // Filter to get only the links that lead to hike details
-            List<string> hikeLinks = hikes.Where(hike => hike.GetAttribute("href").Contains("/go-hiking/hikes/")).Select(link => link.GetAttribute("href")).Distinct().ToList();
+            // total count
+            string totalHikes = GetElementTextOrDefault(driver, "XPath", "//div[@class='search-result-header']//span[@class='search-count']/span");
+            int.TryParse(totalHikes, out int totalHikesCount);
+            Console.WriteLine($"Total Hikes Count: {totalHikesCount}");
+
+            int pageIdx = 0;
+            List<string> hikeLinksList = new List<string>();
+
+            // Last Page Index
+            string lastPageIdxString = driver.FindElement(By.CssSelector("li.last a")).Text;
+            int.TryParse(lastPageIdxString, out int lastPageIdx);
+
+            // Get all links. Loop through all pages.
+            while (lastPageIdx > pageIdx)
+            {
+                // Active Page Idx
+                string activePageIdxString = driver.FindElement(By.CssSelector("li.active > span")).Text;
+                int.TryParse(activePageIdxString, out pageIdx);
+
+                // Next Page Link
+                var nextPageUrl = driver.FindElement(By.XPath("//li[@class='active']/following-sibling::li/a")).GetAttribute("href");
+
+                foreach (var hike in hikes) 
+                {
+                    string href = hike.GetAttribute("href");
+
+                    if (!string.IsNullOrEmpty(href) && href.Contains("/go-hiking/hikes/"))
+                    {
+                        if (!hikeLinksList.Contains(href))
+                        {
+                            hikeLinksList.Add(href);
+                        }
+                    }
+                }
+
+                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
+
+                wait.until(ExpectedConditions.visiblityofElementToBeClickable(By.locator(“”)));
+
+                driver = new ChromeDriver();
+                driver.Navigate().GoToUrl(nextPageUrl);
+            }
 
             // Create Name : link Dictionary of hike names and links
-            foreach (string link in hikeLinks)
+            foreach (string link in hikeLinksList)
             {
                 Match match = Regex.Match(link, pattern);
 
                 if (match.Success)
                 {
-                    //hikesDict.Add(match.Value, link);
-                    //Console.WriteLine(match.Value + " " + link);
                     string hikeName = match.Value;
                     Hike hike = new Hike();
 

@@ -25,7 +25,7 @@ namespace HikingTrailAdvisory
 
             try
             {
-                while (true)
+                while (true) // PROBLEMATIC I ALREADY DO THIS IN HIKEINFOSCRAPER
                 {
                     // Click through all pages and populate hikesDict with all hike names / links
                     IWebElement nextUrl = driver.FindElement(By.CssSelector("li.next a"));
