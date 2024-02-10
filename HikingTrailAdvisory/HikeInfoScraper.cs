@@ -54,10 +54,6 @@ namespace HikingTrailAdvisory
                     }
                 }
 
-                var wait = new WebDriverWait(driver, TimeSpan.FromSeconds(3));
-
-                wait.until(ExpectedConditions.visiblityofElementToBeClickable(By.locator(“”)));
-
                 driver = new ChromeDriver();
                 driver.Navigate().GoToUrl(nextPageUrl);
             }
