@@ -9,12 +9,14 @@ using Newtonsoft.Json;
 using OpenQA.Selenium.Support.UI;
 using System.Runtime.InteropServices;
 using OpenQA.Selenium.Chrome;
+using SeleniumExtras.WaitHelpers;
+
 
 namespace HikingTrailAdvisory
 {
     internal class HikeInfoScraper
     {
-        internal static Dictionary<string, Hike> ScrapeHikeLinks(IWebDriver driver, IWebElement url, string pattern, Dictionary<string, Hike> hikesDict)
+        internal static Dictionary<string, Hike> ScrapeHikeLinks(IWebDriver driver, string pattern, Dictionary<string, Hike> hikesDict)
         {
             // Find all <a> elements
             var hikes = driver.FindElements(By.TagName("a"));
@@ -34,14 +36,17 @@ namespace HikingTrailAdvisory
             // Get all links. Loop through all pages.
             while (lastPageIdx > pageIdx)
             {
+                Console.WriteLine($"PageIdx: {pageIdx} / {lastPageIdx}");
+                Console.WriteLine($"Hike Count: {hikeLinksList.Count} / {totalHikes}");
+
                 // Active Page Idx
                 string activePageIdxString = driver.FindElement(By.CssSelector("li.active > span")).Text;
                 int.TryParse(activePageIdxString, out pageIdx);
 
-                // Next Page Link
-                var nextPageUrl = driver.FindElement(By.XPath("//li[@class='active']/following-sibling::li/a")).GetAttribute("href");
+                // Fetch or refresh the list of hike elements for the current page
+                hikes = driver.FindElements(By.XPath("//a[contains(@href, 'go-hiking/hikes/')]"));
 
-                foreach (var hike in hikes) 
+                foreach (var hike in hikes)
                 {
                     string href = hike.GetAttribute("href");
 
@@ -54,8 +59,18 @@ namespace HikingTrailAdvisory
                     }
                 }
 
-                driver = new ChromeDriver();
-                driver.Navigate().GoToUrl(nextPageUrl);
+                var nextPageLink = new WebDriverWait(driver, TimeSpan.FromSeconds(10)).Until(ExpectedConditions.ElementToBeClickable(By.XPath("//li[@class='active']/following-sibling::li/a")));
+
+                // Scroll into view and click the next page link
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", nextPageLink);
+                Thread.Sleep(500); // Allow time for any animations or loading
+
+                nextPageLink.Click();
+
+                // Wait for the next page to fully load before continuing the loop
+                // This wait should ensure that the page has loaded and the elements can be interacted with
+                // You might need a specific element on the page to ensure it's fully loaded, adjust as necessary
+                new WebDriverWait(driver, TimeSpan.FromSeconds(10)).Until(d => d.FindElement(By.CssSelector("li.active > span")).Displayed);
             }
 
             // Create Name : link Dictionary of hike names and links
@@ -73,10 +88,6 @@ namespace HikingTrailAdvisory
                     hikesDict.Add(hikeName, hike);
                 }
             }
-
-            // Navigate to the page containing the hikes
-            ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", url);
-            url.Click();
 
             // Serialize to json
             var json = JsonConvert.SerializeObject(hikesDict); // Newtonsoft

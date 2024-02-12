@@ -28,16 +28,14 @@ namespace HikingTrailAdvisory
                 while (true) // PROBLEMATIC I ALREADY DO THIS IN HIKEINFOSCRAPER
                 {
                     // Click through all pages and populate hikesDict with all hike names / links
-                    IWebElement nextUrl = driver.FindElement(By.CssSelector("li.next a"));
-                    HikeInfoScraper.ScrapeHikeLinks(driver, nextUrl, pattern, hikesDict);
+                    HikeInfoScraper.ScrapeHikeLinks(driver, pattern, hikesDict);
                 }
             }
             catch (Exception ex)
             {
                 driver = new ChromeDriver(); // ERROR HERE. Fix Stale driver
 
-                IWebElement nextUrl = driver.FindElement(By.CssSelector("li.next a"));
-                HikeInfoScraper.ScrapeHikeLinks(driver, nextUrl, pattern, hikesDict);
+                HikeInfoScraper.ScrapeHikeLinks(driver, pattern, hikesDict);
             }
         }
 
