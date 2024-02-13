@@ -1,7 +1,10 @@
-﻿using OpenQA.Selenium;
+﻿using AngleSharp;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.DevTools.V119.Network;
 using OpenQA.Selenium.Support.UI;
+using System;
+using System.Configuration;
 using System.Text.RegularExpressions;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
@@ -25,17 +28,21 @@ namespace HikingTrailAdvisory
 
             try
             {
-                while (true) // PROBLEMATIC I ALREADY DO THIS IN HIKEINFOSCRAPER
+                while (true)
                 {
                     // Click through all pages and populate hikesDict with all hike names / links
                     HikeInfoScraper.ScrapeHikeLinks(driver, pattern, hikesDict);
                 }
             }
+            catch (StaleElementReferenceException staleEx)
+            {
+                Console.WriteLine(staleEx.ToString());
+                driver = new ChromeDriver();
+                HikeInfoScraper.ScrapeHikeLinks(driver, pattern, hikesDict);
+            }
             catch (Exception ex)
             {
-                driver = new ChromeDriver(); // ERROR HERE. Fix Stale driver
-
-                HikeInfoScraper.ScrapeHikeLinks(driver, pattern, hikesDict);
+                Console.WriteLine(ex.ToString());
             }
         }
 

@@ -18,10 +18,8 @@ namespace HikingTrailAdvisory
         public string Description { get; set; }
         public string Link { get; set; }
 
-        // Constructor
         public Hike() 
         {
-            
         }
 
         public Hike(string name, string length, string elevationGain, string highestPoint, string coords, string difficulty, string description, string link) 
