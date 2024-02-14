@@ -20,7 +20,7 @@ namespace HikingTrailAdvisory
             int.TryParse(lastPageIdxString, out int lastPageIdx);
 
             // Total number of hikes
-            string totalHikes = GetElementTextOrDefault(driver, "XPath", "//div[@class='search-result-header']//span[@class='search-count']/span");
+            string totalHikes = ScraperHelper.GetElementTextOrDefault(driver, "XPath", "//div[@class='search-result-header']//span[@class='search-count']/span");
             int.TryParse(totalHikes, out int totalHikesCount);
             Console.WriteLine($"Total Hikes Count: {totalHikesCount}");
 
@@ -40,10 +40,9 @@ namespace HikingTrailAdvisory
 
         private static int ProcessHikesAndNavigateToNextPage(IWebDriver driver, List<string> hikeLinksList)
         {
-            int pageIdx;
             // Current Page Idx
             string currentPageIdxString = driver.FindElement(By.CssSelector("li.active > span")).Text;
-            int.TryParse(currentPageIdxString, out pageIdx);
+            int.TryParse(currentPageIdxString, out int pageIdx);
 
             // Fetch list of hike elements for the current page
             var hikes = driver.FindElements(By.XPath("//a[contains(@href, 'go-hiking/hikes/')]"));
@@ -97,49 +96,16 @@ namespace HikingTrailAdvisory
             driver.Navigate().GoToUrl(hikeUrl);
 
             // Populate Hike Object
-            hike.Name = GetElementTextOrDefault(driver, "ClassName", "documentFirstHeading"); ;
-            hike.Length = GetElementTextOrDefault(driver, "XPath", "//dt[contains(., 'Length')]/following-sibling::dd"); ;
-            hike.ElevationGain = GetElementTextOrDefault(driver, "XPath", "//dt[contains(., 'Elevation Gain')]/following-sibling::dd"); ;
-            hike.HighestPoint = GetElementTextOrDefault(driver, "XPath", "//dt[contains(., 'Highest Point')]/following-sibling::dd"); ;
-            hike.Coords = GetElementTextOrDefault(driver, "XPath", "//img[contains(@src, 'location.svg')]/following-sibling::span//span"); ;
-            hike.Difficulty = GetElementTextOrDefault(driver, "XPath", "//dt[contains(text(), 'Calculated Difficulty')]/following-sibling::dd"); ;
-            hike.Description = GetElementTextOrDefault(driver, "Id", "hike-body-text"); ;
+            hike.Name = ScraperHelper.GetElementTextOrDefault(driver, "ClassName", "documentFirstHeading"); ;
+            hike.Length = ScraperHelper.GetElementTextOrDefault(driver, "XPath", "//dt[contains(., 'Length')]/following-sibling::dd"); ;
+            hike.ElevationGain = ScraperHelper.GetElementTextOrDefault(driver, "XPath", "//dt[contains(., 'Elevation Gain')]/following-sibling::dd"); ;
+            hike.HighestPoint = ScraperHelper.GetElementTextOrDefault(driver, "XPath", "//dt[contains(., 'Highest Point')]/following-sibling::dd"); ;
+            hike.Coords = ScraperHelper.GetElementTextOrDefault(driver, "XPath", "//img[contains(@src, 'location.svg')]/following-sibling::span//span"); ;
+            hike.Difficulty = ScraperHelper.GetElementTextOrDefault(driver, "XPath", "//dt[contains(text(), 'Calculated Difficulty')]/following-sibling::dd"); ;
+            hike.Description = ScraperHelper.GetElementTextOrDefault(driver, "Id", "hike-body-text"); ;
             hike.Link = hikeUrl;
 
             return hike;
-        }
-
-        private static string GetElementTextOrDefault(IWebDriver driver, string pathType, string path, string defaultValue="")
-        {
-            try
-            {
-                if (pathType == "XPath")
-                {
-                    return driver.FindElement(By.XPath(path)).Text;
-                }
-                else if (pathType == "Id")
-                {
-                    return driver.FindElement(By.Id(path)).Text;
-                }
-                else if (pathType == "ClassName")
-                {
-                    return driver.FindElement(By.ClassName(path)).Text;
-                }
-                else
-                {
-                    return $"Error: {pathType} is an unkown pathType";
-                }
-            }
-            catch (NoSuchElementException)
-            {
-                return defaultValue;
-            }
-            catch (StaleElementReferenceException)
-            {
-                // Reattempt to find the element after waiting for it to become stable
-                WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
-                return defaultValue;
-            }
         }
     }
 }
