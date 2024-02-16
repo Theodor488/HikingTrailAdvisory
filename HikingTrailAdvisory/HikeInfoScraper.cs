@@ -5,7 +5,7 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 
 namespace HikingTrailAdvisory
-{
+{ 
     internal class HikeInfoScraper
     {
         internal static Dictionary<string, Hike> ScrapeHikeLinks(IWebDriver driver, string pattern, Dictionary<string, Hike> hikesDict)
