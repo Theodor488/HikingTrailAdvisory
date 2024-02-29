@@ -16,7 +16,7 @@ namespace HikingTrailAdvisory
         static async Task Main(string[] args)
         {
             string baseUrl = "https://www.wta.org/go-outside/hikes";
-            string pattern = @"[^/]+$";
+            string pattern = @"[^/]+$"; // What is the pattern for?
             Dictionary<string, Hike> hikesDict = new Dictionary<string, Hike>();
 
             // Set up Driver for web scraping
