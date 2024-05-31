@@ -3,10 +3,8 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
-using MongoDataAccess.DataAccess;
+using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDBDemo;
-using MongoDataAccess.Models;
 
 namespace HikingTrailAdvisory
 { 

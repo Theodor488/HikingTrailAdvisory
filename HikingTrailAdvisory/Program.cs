@@ -19,6 +19,8 @@ namespace HikingTrailAdvisory
             string pattern = @"[^/]+$"; // What is the pattern for?
             Dictionary<string, Hike> hikesDict = new Dictionary<string, Hike>();
 
+            MongoDBService mongoDBService = new MongoDBService();
+
             // Set up Driver for web scraping
             new DriverManager().SetUpDriver(new ChromeConfig());
             IWebDriver driver = new ChromeDriver();
@@ -44,6 +46,8 @@ namespace HikingTrailAdvisory
             {
                 Console.WriteLine(ex.ToString());
             }
+
+            mongoDBService.InsertDictionaryAsync(hikesDict);
         }
 
         
