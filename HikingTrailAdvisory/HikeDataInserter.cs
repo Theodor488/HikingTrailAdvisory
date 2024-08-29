@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Microsoft.Data.SqlClient;
 
-// Server=tcp:hike-aware-server.database.windows.net,1433;Initial Catalog=HikeAwareDB;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Authentication="Active Directory Default";
 namespace HikingTrailAdvisory
 {
     public class HikeDataInserter
@@ -22,7 +21,7 @@ namespace HikingTrailAdvisory
 
                 foreach (var trail in trailData.Values)
                 {
-                    string insertTrailQuery = "INSERT INTO TrailsTest (Name, Length, ElevationGain, HighestPoint, Coords, Difficulty, Description, Link) " +
+                    string insertTrailQuery = "INSERT INTO Trails (Name, Length, ElevationGain, HighestPoint, Coords, Difficulty, Description, Link) " +
                                                           "VALUES (@Name, @Length, @ElevationGain, @HighestPoint, @Coords, @Difficulty, @Description, @Link)";
 
                     using (SqlCommand command = new SqlCommand(insertTrailQuery, connection))
