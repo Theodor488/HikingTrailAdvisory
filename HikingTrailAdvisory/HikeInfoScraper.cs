@@ -27,7 +27,7 @@ namespace HikingTrailAdvisory
             Console.WriteLine($"Total Hikes Count: {totalHikesCount}");
 
             // Get all links. Loop through all pages.
-            while (lastPageIdx >= pageIdx)
+            while (1 > pageIdx) //while (lastPageIdx >= pageIdx)
             {
                 Console.WriteLine($"PageIdx: {pageIdx} / {lastPageIdx}");
                 Console.WriteLine($"Hike Count: {hikeLinksList.Count} / {totalHikes}");

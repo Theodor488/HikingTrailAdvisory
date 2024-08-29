@@ -46,10 +46,9 @@ namespace HikingTrailAdvisory
             {
                 Console.WriteLine(ex.ToString());
             }
-
-            mongoDBService.InsertDictionaryAsync(hikesDict);
+            string sqlConnectionString = "";
+            HikeDataInserter hikeDataInserter = new HikeDataInserter(sqlConnectionString);
+            hikeDataInserter.InsertTrailData(hikesDict);
         }
-
-        
     }
 }
