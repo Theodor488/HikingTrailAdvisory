@@ -3,8 +3,6 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
-using MongoDB.Bson;
-using MongoDB.Driver;
 
 namespace HikingTrailAdvisory
 { 
@@ -27,7 +25,7 @@ namespace HikingTrailAdvisory
             Console.WriteLine($"Total Hikes Count: {totalHikesCount}");
 
             // Get all links. Loop through all pages.
-            while (lastPageIdx >= pageIdx)
+            while (lastPageIdx-2 >= pageIdx)
             {
                 Console.WriteLine($"PageIdx: {pageIdx} / {lastPageIdx}");
                 Console.WriteLine($"Hike Count: {hikeLinksList.Count} / {totalHikes}");
@@ -35,7 +33,6 @@ namespace HikingTrailAdvisory
             }
 
             PopulateHikesDictionary(driver, pattern, hikesDict, hikeLinksList);
-            var json = JsonConvert.SerializeObject(hikesDict);
 
             return hikesDict;
         }
