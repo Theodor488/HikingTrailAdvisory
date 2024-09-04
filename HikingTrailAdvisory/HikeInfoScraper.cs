@@ -3,11 +3,13 @@ using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
+using System.Runtime.CompilerServices;
 
 namespace HikingTrailAdvisory
-{ 
+{
     internal class HikeInfoScraper
     {
+        private static string sqlConnectionString = "";
         internal static Dictionary<string, Hike> ScrapeHikeLinks(IWebDriver driver, string pattern, Dictionary<string, Hike> hikesDict)
         {
             List<string> hikeLinksList = new List<string>();
@@ -61,6 +63,8 @@ namespace HikingTrailAdvisory
 
         private static void PopulateHikesDictionary(IWebDriver driver, string pattern, Dictionary<string, Hike> hikesDict, List<string> hikeLinksList)
         {
+            hikesDict = new Dictionary<string, Hike>();
+
             foreach (string link in hikeLinksList)
             {
                 Match match = Regex.Match(link, pattern);
@@ -75,6 +79,15 @@ namespace HikingTrailAdvisory
                     hikesDict.Add(hikeName, hike);
                 }
             }
+
+            InjectHikesDataIntoDB(hikesDict);
+        }
+
+        private static void InjectHikesDataIntoDB(Dictionary<string, Hike> hikesDict)
+        {
+            HikeDataInserter hikeDataInserter = new HikeDataInserter(sqlConnectionString);
+            hikeDataInserter.InsertTrailData(hikesDict);
+            Console.WriteLine($"Inserted data into DB. hikesDict length: {hikesDict.Count}");
         }
 
         internal static void PopulateListOfHikes(List<string> hikeLinksList, System.Collections.ObjectModel.ReadOnlyCollection<IWebElement> hikes)

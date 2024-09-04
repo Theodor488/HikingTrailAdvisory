@@ -46,9 +46,6 @@ namespace HikingTrailAdvisory
             {
                 Console.WriteLine(ex.ToString());
             }
-            string sqlConnectionString = "";
-            HikeDataInserter hikeDataInserter = new HikeDataInserter(sqlConnectionString);
-            hikeDataInserter.InsertTrailData(hikesDict);
         }
     }
 }
