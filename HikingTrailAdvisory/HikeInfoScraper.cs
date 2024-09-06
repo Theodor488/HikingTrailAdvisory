@@ -64,6 +64,7 @@ namespace HikingTrailAdvisory
         private static void PopulateHikesDictionary(IWebDriver driver, string pattern, Dictionary<string, Hike> hikesDict, List<string> hikeLinksList)
         {
             hikesDict = new Dictionary<string, Hike>();
+            int currentHikeCount = 0;
 
             foreach (string link in hikeLinksList)
             {
@@ -77,9 +78,19 @@ namespace HikingTrailAdvisory
                     hike = ScrapeIndividualHikePage(driver, link, pattern, hikesDict, hike);
 
                     hikesDict.Add(hikeName, hike);
+                    Console.WriteLine($"Added {hikeName} to hikesDict. Hike #{currentHikeCount} added.");
+                    currentHikeCount++;
+
+                    // Ingest data every 10 hikes (in case it crashes so we don't have to start from scratch each time)
+                    if (currentHikeCount % 10 == 0)
+                    {
+                        InjectHikesDataIntoDB(hikesDict);
+                        hikesDict = new Dictionary<string, Hike>();
+                    }
                 }
             }
 
+            // inject remaining data 
             InjectHikesDataIntoDB(hikesDict);
         }
 
